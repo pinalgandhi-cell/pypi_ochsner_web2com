@@ -18,6 +18,14 @@ function formatDateInput(date: Date): string {
   return date.toISOString().slice(0, 10)
 }
 
+function formatUkDate(value: string): string {
+  return new Intl.DateTimeFormat('en-GB', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+  }).format(new Date(`${value}T00:00:00.000Z`))
+}
+
 function statCard(label: string, value: string, subtitle?: string) {
   return (
     <div className="rounded-xl border border-slate-800 bg-slate-950/70 p-4">
@@ -84,21 +92,25 @@ export function CostCalculator() {
           <input
             aria-label="From date"
             type="date"
+            lang="en-GB"
             value={from}
             max={to}
             onChange={(event) => setFrom(event.target.value)}
           />
+          <p className="text-xs text-slate-500">Selected: {formatUkDate(from)}</p>
         </label>
         <label className="space-y-2">
           <span className="text-sm text-slate-300">To</span>
           <input
             aria-label="To date"
             type="date"
+            lang="en-GB"
             value={to}
             min={from}
             max={formatDateInput(today)}
             onChange={(event) => setTo(event.target.value)}
           />
+          <p className="text-xs text-slate-500">Selected: {formatUkDate(to)}</p>
         </label>
         <div className="rounded-xl border border-slate-800 bg-slate-950/70 p-4">
           <p className="text-sm text-slate-400">Tariff rate display</p>
@@ -109,7 +121,7 @@ export function CostCalculator() {
               {tariffData.selectedRates.map(
                 (period: { from: string; to: string; unitRate: number; standingCharge: number }) => (
                   <li key={`${period.from}-${period.to}`}>
-                    {period.from} → {period.to}: {period.unitRate.toFixed(2)}p/kWh
+                    {formatUkDate(period.from)} → {formatUkDate(period.to)}: {period.unitRate.toFixed(2)}p/kWh
                     <span className="text-slate-500"> • standing charge {period.standingCharge.toFixed(2)}p/day</span>
                   </li>
                 )
@@ -153,7 +165,7 @@ export function CostCalculator() {
           <ul className="mt-2 space-y-1 text-sm text-slate-300">
             {cost.breakdown.map((line) => (
               <li key={`${line.from}-${line.to}`}>
-                {line.from} → {line.to}: {line.kWh.toFixed(2)} kWh × {line.unitRate.toFixed(2)}p = £
+                {formatUkDate(line.from)} → {formatUkDate(line.to)}: {line.kWh.toFixed(2)} kWh × {line.unitRate.toFixed(2)}p = £
                 {line.costPounds.toFixed(2)}
               </li>
             ))}
