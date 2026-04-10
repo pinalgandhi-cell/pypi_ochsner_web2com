@@ -2,3 +2,5 @@
 .DS_Store
 *.whl
 *.gz
+node_modules/
+.next/
