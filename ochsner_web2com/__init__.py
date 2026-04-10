@@ -1,0 +1,33 @@
+from .web2com import (
+    AUTH,
+    AUXILIARY,
+    DHW,
+    HEAT_PUMP,
+    HEATING_CIRCUIT,
+    MANAGER,
+    AuthenticationError,
+    HttpError,
+    InvalidCommandIdError,
+    RequestTimeoutError,
+    ResponseParseError,
+    Service,
+    SoapFaultError,
+    Web2ComError,
+)
+
+__all__ = [
+    'AUTH',
+    'AUXILIARY',
+    'DHW',
+    'HEAT_PUMP',
+    'HEATING_CIRCUIT',
+    'MANAGER',
+    'AuthenticationError',
+    'HttpError',
+    'InvalidCommandIdError',
+    'RequestTimeoutError',
+    'ResponseParseError',
+    'Service',
+    'SoapFaultError',
+    'Web2ComError',
+]

@@ -9,7 +9,7 @@ Example
     
     ## Connect to a web2com server with default eBus and device id.
     ## Use Digest access authentication as default
-    w2c = web2com.Service('192.168.188.50', 'OEM', 'password')
+    w2c = web2com.Service('192.168.188.50', 'OEM', 'password', timeout=10)
 
     ## Change the id's of ebus or device.
     w2c.set_eBus_id(1)
@@ -46,6 +46,18 @@ Example
 ```
 The first parameter of the result holds the HTTP result code
 and the second paramter the value of the paramter.
+
+On invalid input, network failures, HTTP failures, or SOAP faults the client now
+raises typed exceptions instead of returning `(0, 0.0)`. The main exception types
+are:
+
+- `Web2ComError`
+- `InvalidCommandIdError`
+- `AuthenticationError`
+- `RequestTimeoutError`
+- `HttpError`
+- `ResponseParseError`
+- `SoapFaultError`
 
 Paramter List:
 
@@ -94,7 +106,6 @@ Default paramter:
 | ----------- | -- |
 | eBus | 1 | 
 | device | 2 |
-
 
 
 
