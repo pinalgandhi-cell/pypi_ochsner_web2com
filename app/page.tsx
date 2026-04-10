@@ -1,5 +1,6 @@
 'use client'
 
+import Link from 'next/link'
 import { useState } from 'react'
 import useSWR from 'swr'
 
@@ -71,15 +72,25 @@ export default function DashboardPage() {
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 py-6 sm:px-6 lg:px-8">
         <header className="flex flex-col gap-2">
           <p className="text-sm uppercase tracking-[0.2em] text-sky-300">Read-only monitoring dashboard</p>
-          <h1 className="text-3xl font-semibold text-slate-50">Ochsner heat pump system</h1>
-          <p className="max-w-3xl text-sm text-slate-400">
-            Polling every 30 seconds with server-side Modbus or REST access through Next.js route handlers.
-          </p>
+          <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+            <div>
+              <h1 className="text-3xl font-semibold text-slate-50">Ochsner heat pump system</h1>
+              <p className="max-w-3xl text-sm text-slate-400">
+                Polling every 30 seconds with server-side route handlers. Saved Web2Com credentials from the admin page are used when present; otherwise the dashboard falls back to the configured environment data source.
+              </p>
+            </div>
+            <Link
+              href="/admin"
+              className="inline-flex rounded-xl border border-slate-700 px-4 py-2 text-sm text-slate-200 transition hover:border-slate-500"
+            >
+              Admin connection settings
+            </Link>
+          </div>
         </header>
 
         {error ? (
           <div className="rounded-2xl border border-rose-500/40 bg-rose-500/10 p-4 text-sm text-rose-200">
-            The dashboard could not reach the current heat pump endpoint. Check the environment variables and server-side data source.
+            The dashboard could not reach the current heat pump endpoint. Check the saved Web2Com connection under Admin connection settings, or fall back to the environment-based data source.
           </div>
         ) : null}
         {historyError ? (

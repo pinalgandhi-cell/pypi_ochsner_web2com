@@ -1,6 +1,12 @@
 import { generateMockHistory, generateMockSnapshot } from '@/lib/mockData'
 import { readHeatpumpFromModbus } from '@/lib/modbusClient'
-import type { EventLogEntry, HeatpumpHistoryResponse, HeatpumpSnapshot } from '@/lib/types'
+import type {
+  EventLogEntry,
+  HeatpumpHistoryResponse,
+  HeatpumpSnapshot,
+  Web2ComConnectionInput,
+} from '@/lib/types'
+import { readHeatpumpFromWeb2Com } from '@/lib/web2comClient'
 
 const DAY_MS = 24 * 60 * 60 * 1000
 const HOUR_MS = 60 * 60 * 1000
@@ -154,7 +160,11 @@ function buildEstimatedHistory(snapshot: HeatpumpSnapshot, from: Date, to: Date)
   }
 }
 
-export async function getCurrentHeatpumpSnapshot(): Promise<HeatpumpSnapshot> {
+export async function getCurrentHeatpumpSnapshot(connection?: Web2ComConnectionInput | null): Promise<HeatpumpSnapshot> {
+  if (connection) {
+    return readHeatpumpFromWeb2Com(connection)
+  }
+
   const source = process.env.HEATPUMP_DATA_SOURCE ?? 'mock'
 
   if (source === 'mock') {
@@ -168,7 +178,16 @@ export async function getCurrentHeatpumpSnapshot(): Promise<HeatpumpSnapshot> {
   return readHeatpumpFromModbus()
 }
 
-export async function getHeatpumpHistory(from: Date, to: Date): Promise<HeatpumpHistoryResponse> {
+export async function getHeatpumpHistory(
+  from: Date,
+  to: Date,
+  connection?: Web2ComConnectionInput | null
+): Promise<HeatpumpHistoryResponse> {
+  if (connection) {
+    const snapshot = await getCurrentHeatpumpSnapshot(connection)
+    return buildEstimatedHistory(snapshot, from, to)
+  }
+
   const source = process.env.HEATPUMP_DATA_SOURCE ?? 'mock'
 
   if (source === 'mock') {

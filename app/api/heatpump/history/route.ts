@@ -1,5 +1,7 @@
+import { cookies } from 'next/headers'
 import { NextRequest, NextResponse } from 'next/server'
 
+import { deserializeConnection, getConnectionCookieName } from '@/lib/connectionSession'
 import { getHeatpumpHistory } from '@/lib/heatpumpData'
 
 export const runtime = 'nodejs'
@@ -36,7 +38,10 @@ function parseRequestWindow(request: NextRequest): { from: Date; to: Date } {
 export async function GET(request: NextRequest) {
   try {
     const { from, to } = parseRequestWindow(request)
-    const data = await getHeatpumpHistory(from, to)
+    const savedConnection = deserializeConnection(
+      cookies().get(getConnectionCookieName())?.value ?? ''
+    )
+    const data = await getHeatpumpHistory(from, to, savedConnection)
     return NextResponse.json(data, {
       headers: {
         'Cache-Control': 'no-store, max-age=0',

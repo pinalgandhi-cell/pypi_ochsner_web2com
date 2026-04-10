@@ -1,5 +1,6 @@
 export type OperatingMode = 'heating' | 'cooling' | 'dhw' | 'standby' | 'defrost'
 export type FaultSeverity = 'info' | 'warning' | 'error'
+export type Web2ComAuthMode = 'digest' | 'basic'
 
 export interface FaultCode {
   code: string
@@ -73,4 +74,17 @@ export interface HeatpumpHistoryResponse {
   events: EventLogEntry[]
   estimated: boolean
   note?: string
+}
+
+export interface Web2ComConnectionInput {
+  endpoint: string
+  username: string
+  password: string
+  authMode: Web2ComAuthMode
+}
+
+export interface SavedConnectionSummary {
+  endpoint: string
+  username: string
+  authMode: Web2ComAuthMode
 }
