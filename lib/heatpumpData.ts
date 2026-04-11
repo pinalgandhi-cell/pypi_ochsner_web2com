@@ -43,6 +43,20 @@ async function fetchRestSnapshot(): Promise<HeatpumpSnapshot> {
   return (await response.json()) as HeatpumpSnapshot
 }
 
+async function getConfiguredHeatpumpSnapshot(): Promise<HeatpumpSnapshot> {
+  const source = process.env.HEATPUMP_DATA_SOURCE ?? 'mock'
+
+  if (source === 'mock') {
+    return generateMockSnapshot()
+  }
+
+  if (source === 'rest') {
+    return fetchRestSnapshot()
+  }
+
+  return readHeatpumpFromModbus()
+}
+
 function stepForSpan(spanMs: number): number {
   if (spanMs <= 48 * HOUR_MS) {
     return HOUR_MS
@@ -162,20 +176,14 @@ function buildEstimatedHistory(snapshot: HeatpumpSnapshot, from: Date, to: Date)
 
 export async function getCurrentHeatpumpSnapshot(connection?: Web2ComConnectionInput | null): Promise<HeatpumpSnapshot> {
   if (connection) {
-    return readHeatpumpFromWeb2Com(connection)
+    try {
+      return await readHeatpumpFromWeb2Com(connection)
+    } catch {
+      return getConfiguredHeatpumpSnapshot()
+    }
   }
 
-  const source = process.env.HEATPUMP_DATA_SOURCE ?? 'mock'
-
-  if (source === 'mock') {
-    return generateMockSnapshot()
-  }
-
-  if (source === 'rest') {
-    return fetchRestSnapshot()
-  }
-
-  return readHeatpumpFromModbus()
+  return getConfiguredHeatpumpSnapshot()
 }
 
 export async function getHeatpumpHistory(
@@ -184,8 +192,18 @@ export async function getHeatpumpHistory(
   connection?: Web2ComConnectionInput | null
 ): Promise<HeatpumpHistoryResponse> {
   if (connection) {
-    const snapshot = await getCurrentHeatpumpSnapshot(connection)
-    return buildEstimatedHistory(snapshot, from, to)
+    try {
+      const snapshot = await readHeatpumpFromWeb2Com(connection)
+      return buildEstimatedHistory(snapshot, from, to)
+    } catch {
+      const source = process.env.HEATPUMP_DATA_SOURCE ?? 'mock'
+      if (source === 'mock') {
+        return generateMockHistory(from, to)
+      }
+
+      const snapshot = await getConfiguredHeatpumpSnapshot()
+      return buildEstimatedHistory(snapshot, from, to)
+    }
   }
 
   const source = process.env.HEATPUMP_DATA_SOURCE ?? 'mock'

@@ -4,6 +4,7 @@ import { parseStringPromise } from 'xml2js'
 import type { FaultCode, HeatpumpSnapshot, OperatingMode, Web2ComConnectionInput } from '@/lib/types'
 
 type DataPointMap = Record<string, number | string | boolean | null>
+const WEB2COM_REQUEST_TIMEOUT_MS = 7_000
 
 const SOAP_HEADERS = {
   'Content-Type': 'text/xml; charset=utf-8',
@@ -133,11 +134,26 @@ function deriveFaultCodes(values: DataPointMap): FaultCode[] {
 }
 
 async function fetchPoint(client: DigestClient, endpoint: string, path: string): Promise<number | string | boolean | null> {
-  const response = await client.fetch(`http://${endpoint}/ws`, {
-    method: 'POST',
-    headers: SOAP_HEADERS,
-    body: buildGetEnvelope(path),
-  })
+  const controller = new AbortController()
+  const timeout = setTimeout(() => controller.abort(), WEB2COM_REQUEST_TIMEOUT_MS)
+
+  const response = await (async () => {
+  try {
+      return client.fetch(`http://${endpoint}/ws`, {
+      method: 'POST',
+      headers: SOAP_HEADERS,
+      body: buildGetEnvelope(path),
+      signal: controller.signal,
+    })
+  } catch (error) {
+    if (error instanceof Error && error.name === 'AbortError') {
+      throw new Error(`Web2Com request timed out after ${WEB2COM_REQUEST_TIMEOUT_MS}ms`)
+    }
+    throw error
+  } finally {
+    clearTimeout(timeout)
+  }
+  })()
 
   if (response.status === 401 || response.status === 403) {
     throw new Error('Authentication failed for Web2Com')
