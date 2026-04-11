@@ -1,0 +1,32 @@
+{
+  "name": "ochsner-heatpump-dashboard",
+  "private": true,
+  "scripts": {
+    "clean": "node -e \"require('fs').rmSync('.next', { recursive: true, force: true })\"",
+    "dev": "next dev",
+    "build": "npm run clean && next build",
+    "start": "next start",
+    "typecheck": "tsc --noEmit -p tsconfig.typecheck.json"
+  },
+  "dependencies": {
+    "digest-fetch": "3.1.1",
+    "modbus-serial": "8.0.25",
+    "next": "14.2.35",
+    "node-fetch": "3.3.2",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "recharts": "3.8.1",
+    "swr": "2.4.1",
+    "xml2js": "0.6.2"
+  },
+  "devDependencies": {
+    "@types/node": "22.15.3",
+    "@types/react": "18.3.23",
+    "@types/react-dom": "18.3.7",
+    "@types/xml2js": "0.4.14",
+    "autoprefixer": "10.4.21",
+    "postcss": "8.5.3",
+    "tailwindcss": "3.4.19",
+    "typescript": "5.8.3"
+  }
+}
